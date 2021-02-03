@@ -26,16 +26,20 @@ class SubHandler(object):
 
     def datachange_notification(self, node, val, data):
         if (str(node.nodeid)=='StringNodeId(ns=3;s="DB_OPC_UA"."IMS_5A_M0009682"."I_Eingaenge"."I_IMS5A_IL")'):
-            if (val == True):
-                pass
-                #self.station5APresent[0] = True
+            print("IMS5A_IL : Wert ist ....")
+            print(val)
+            #if (val == True):
+            #    pass
+            #   #self.station5APresent[0] = True
         if (str(node.nodeid)=='StringNodeId(ns=3;s="DB_OPC_UA"."IMS_5A_M0009682"."I_Eingaenge"."I_IMS5A_B4")'):
-            if (self.ejected == False and val == False):
-                self.ejected = True
-                self.station5APresent[0] = True
-            elif (self.ejected == True and val == True):
-                self.ejected = False
-                self.station5APresent[0] = False
+            print("IMS5A_B4 : Wert ist ....")
+            print(val)
+            #if (self.ejected == False and val == False):
+            #    self.ejected = True
+            #    self.station5APresent[0] = True
+            #elif (self.ejected == True and val == True):
+            #    self.ejected = False
+            #    self.station5APresent[0] = False
 
         self.queue.put((str(node.nodeid), str(val)))
 
@@ -61,6 +65,7 @@ class CommunicationManager():
 
     def __on_message(self, mqttc, obj, msg):
         # statt topic wahrscheinlich topic+fieldname, als Payload Feld6-8 aus den einzelnen topics (10 verschiedene features insg)
+        print(msg.topic + msg.payload.decode())
         self.__valueQueue.put((msg.topic, msg.payload.decode()))   #msg.payload is bytes, use "decode()" turn it into string.   do not use str()
 
     def MQTT_CreateClient(self, url, port, timeout):
@@ -95,7 +100,7 @@ class CommunicationManager():
     def OPCUA_createClient(self, url):
         self.opcClient = Client(url)
         self.opcClient.connect()
-        logging.info("Client is now connected to " + url)
+        print("OPC UA Client is now connected to " + url)
 
     def OPCUA_subscribe(self, nodeList):
         self.__nodeList = nodeList
@@ -103,10 +108,14 @@ class CommunicationManager():
         self.__startOpcuaThread.start()
 
     def OPCUA_write(self, nodeIDtoWrite, valueToWrite):
-        self.__startOpcuaWriteThread = Thread(target=self.__OPCUA_write, args=(nodeIDtoWrite, valueToWrite),
-                                              name="WriteToOPCUAClient"+str(nodeIDtoWrite))
-        self.__startOpcuaWriteThread.start()
-        self.__startOpcuaWriteThread.join()
+        print("OPC UA write to   " )
+        print(nodeIDtoWrite)
+        print("   with value:  ")
+        print(valueToWrite)
+        #self.__startOpcuaWriteThread = Thread(target=self.__OPCUA_write, args=(nodeIDtoWrite, valueToWrite),
+        #                                      name="WriteToOPCUAClient"+str(nodeIDtoWrite))
+        #self.__startOpcuaWriteThread.start()
+        #self.__startOpcuaWriteThread.join()
 
     def __OPCUA_write(self, nodeID, value):
         var = self.opcClient.get_node(nodeID)
